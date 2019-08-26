@@ -2,6 +2,8 @@ package p4db
 
 import (
 	"database/sql"
+	"sort"
+	"strings"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -54,7 +56,7 @@ var (
 	mu             sync.Mutex
 	containerTypes map[string]string
 	typeHierarchy  map[string][]string
-	attributes     map[ContainerAndAttributeNames][]AttributeDescr
+	attributes     map[ContainerAndAttributeNames]AttributeDescr
 	isValid        bool
 )
 
@@ -79,13 +81,13 @@ func UpdateMetaInf(db *P4db) (err error) {
 }
 
 func fillAttributes(db *P4db) (err error) {
-	attributes = make(map[ContainerAndAttributeNames][]AttributeDescr)
+	attributes = make(map[ContainerAndAttributeNames]AttributeDescr)
 	tmp := []metaDataDB{}
 	if err = db.C.Select(&tmp, "select CodeData, ContainerType, KeyWord, TypeData, Dimension, ReferencedContainerType, LinkPermission  from MetaData"); err == nil {
 		for _, m := range tmp {
 			descr := AttributeDescr{m.CodeData, ContainerAndAttributeNames{m.ContainerType, m.KeyWord}, m.TypeData, m.Dimension > 0, m.ReferencedContainerType.String}
-			containerAttribute := ContainerAndAttributeNames{m.ContainerType, m.KeyWord}
-			attributes[containerAttribute] = append(attributes[containerAttribute], descr)
+			containerAndAttribute := ContainerAndAttributeNames{strings.ToLower(m.ContainerType), strings.ToLower(m.KeyWord)}
+			attributes[containerAndAttribute] = descr
 		}
 	}
 	return err
@@ -116,8 +118,22 @@ func fillTypeHierarchy(db *P4db) (err error) {
 // Basic requests
 
 func IndexByName(typeStr string, attributeName string) (ind int16, err error) {
-	ind, err = -1, errors.New("unknown error")
-	return
+	descr, ok := attributes[ContainerAndAttributeNames{strings.ToLower(typeStr), strings.ToLower(attributeName)}]
+	if !ok {
+		ind, err = -1, errors.New("unknown attribute "+attributeName+" for typeStr "+typeStr)
+	}
+	return descr.Id, err
+}
+
+func AttributeNames(typeStr string) (names []string, err error) {
+	names = []string{}
+	for k, v := range attributes {
+		if k.ContainerType == typeStr {
+			names = append(names, lowercaseFirstChar(v.Name))
+		}
+	}
+	sort.Strings(names)
+	return names, err
 }
 
 func ContainerTypes() map[string]string {
@@ -136,4 +152,18 @@ func TypesHierarchy() map[string][]string {
 		cp[k] = newList
 	}
 	return cp
+}
+
+func lowercaseFirstChar(name string) (res string) {
+	res, ok := specialNamesForFixingCase[strings.ToLower(name)]
+	if !ok {
+		res = strings.ToLower(name[:1]) + name[1:]
+	}
+	return
+}
+
+var specialNamesForFixingCase = map[string]string{
+	"rc":      "rc",
+	"cdp":     "cdp",
+	"cdpstep": "cdpStep",
 }

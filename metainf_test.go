@@ -2,6 +2,7 @@ package p4db_test
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/vaefremov/p4db"
@@ -30,6 +31,34 @@ func TestUpdateMetaInf(t *testing.T) {
 		t.Error(err.Error())
 	}
 
+}
+
+func TestIndexByName(t *testing.T) {
+	db := mustInitialize()
+	defer db.Close()
+	err := p4db.UpdateMetaInf(db)
+	if err != nil {
+		t.Error(err)
+	}
+	ind, err := p4db.IndexByName("proj", "coordinateSystem")
+	wanted_ind := int16(209)
+	if ind != wanted_ind {
+		t.Error("wanted " + string(wanted_ind) + " received " + string(ind))
+	}
+}
+
+func TestAttributeNames(t *testing.T) {
+	db := mustInitialize()
+	defer db.Close()
+	err := p4db.UpdateMetaInf(db)
+	if err != nil {
+		t.Error(err)
+	}
+	expRes := []string{"coordinateSystem", "path"}
+	res, _ := p4db.AttributeNames("proj")
+	if !reflect.DeepEqual(expRes, res) {
+		t.Errorf("wanted: %v received: %v", expRes, res)
+	}
 }
 
 func ExampleGetContainerTypes() {
