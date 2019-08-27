@@ -82,6 +82,14 @@ func (db *P4db) CreateContainer(pid int64, typeStr string, name string) (id int6
 	return
 }
 
+type AttributeValue interface {
+	String() string
+}
+
+func (db *P4db) ContainerAttributes(id int64) (res []AttributeValue) {
+	return nil
+}
+
 func (db *P4db) Close() {
 	db.C.Close()
 }
