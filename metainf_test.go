@@ -59,6 +59,12 @@ func TestAttributeNames(t *testing.T) {
 	if !reflect.DeepEqual(expRes, res) {
 		t.Errorf("wanted: %v received: %v", expRes, res)
 	}
+	expRes = []string{"cdp", "cdpStep", "geometry", "path", "refCDP", "refSP", "spDir"}
+	res, _ = p4db.AttributeNames("lin1")
+	if !reflect.DeepEqual(expRes, res) {
+		t.Errorf("wanted: %v received: %q", expRes, res)
+	}
+
 }
 
 func ExampleGetContainerTypes() {

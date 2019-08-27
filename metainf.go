@@ -52,6 +52,13 @@ type containerTypesSubmissionDB struct {
 	ContainerTypeSlave  string `db:"ContainerTypeSlave"`
 }
 
+var specialNamesForFixingCase = map[string]string{
+	strings.ToLower("RC"):      "rc",
+	strings.ToLower("CDP"):     "cdp",
+	strings.ToLower("CDPStep"): "cdpStep",
+	strings.ToLower("sPDir"):   "spDir",
+}
+
 var (
 	mu             sync.Mutex
 	containerTypes map[string]string
@@ -60,22 +67,10 @@ var (
 	isValid        bool
 )
 
-func UpdateMetaInf(db *P4db) (err error) {
-	mu.Lock()
-	defer mu.Unlock()
-	if !isValid {
-		err = fillContainerTypes(db)
-		if err != nil {
-			return
-		}
-		err = fillTypeHierarchy(db)
-		if err != nil {
-			return
-		}
-		err = fillAttributes(db)
-		if err != nil {
-			return
-		}
+func lowercaseFirstChar(name string) (res string) {
+	res, ok := specialNamesForFixingCase[strings.ToLower(name)]
+	if !ok {
+		res = strings.ToLower(name[:1]) + name[1:]
 	}
 	return
 }
@@ -117,6 +112,29 @@ func fillTypeHierarchy(db *P4db) (err error) {
 
 // Basic requests
 
+// UpdateMetaInf updates internal data structures reading them from the DB.
+// The update process is performed only once, the corresponding flag isValid is set
+func UpdateMetaInf(db *P4db) (err error) {
+	mu.Lock()
+	defer mu.Unlock()
+	if !isValid {
+		err = fillContainerTypes(db)
+		if err != nil {
+			return
+		}
+		err = fillTypeHierarchy(db)
+		if err != nil {
+			return
+		}
+		err = fillAttributes(db)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+// IndexByName finds the ID of attribute () that can be used in subsequent requests
 func IndexByName(typeStr string, attributeName string) (ind int16, err error) {
 	descr, ok := attributes[ContainerAndAttributeNames{strings.ToLower(typeStr), strings.ToLower(attributeName)}]
 	if !ok {
@@ -152,18 +170,4 @@ func TypesHierarchy() map[string][]string {
 		cp[k] = newList
 	}
 	return cp
-}
-
-func lowercaseFirstChar(name string) (res string) {
-	res, ok := specialNamesForFixingCase[strings.ToLower(name)]
-	if !ok {
-		res = strings.ToLower(name[:1]) + name[1:]
-	}
-	return
-}
-
-var specialNamesForFixingCase = map[string]string{
-	"rc":      "rc",
-	"cdp":     "cdp",
-	"cdpstep": "cdpStep",
 }
