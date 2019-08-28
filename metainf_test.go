@@ -94,3 +94,26 @@ func ExampleGetTypesHierarchy() {
 	fmt.Println(k, v)
 	// Output: wel1 [aw2c aw2l cgr1 dirl doc2 par2 tgrp wbnd weld wtpl]
 }
+
+func TestCanCreateSubcontainer(t *testing.T) {
+	db := mustInitialize()
+	defer db.Close()
+	err := p4db.UpdateMetaInf(db)
+	if err != nil {
+		panic(err)
+	}
+	cases := []struct {
+		in1, in2 string
+		exp      bool
+	}{
+		{"root", "proj", true},
+		{"proj", "wel1", true},
+		{"proj", "qqq", false},
+	}
+	for _, c := range cases {
+		res := p4db.CanCreateSubcontainer(c.in1, c.in2)
+		if res != c.exp {
+			t.Error("Case failed", c)
+		}
+	}
+}

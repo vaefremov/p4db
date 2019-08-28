@@ -171,3 +171,15 @@ func TypesHierarchy() map[string][]string {
 	}
 	return cp
 }
+
+func CanCreateSubcontainer(typeStrUpper, typeStr string) bool {
+	tmp, ok := typeHierarchy[typeStrUpper]
+	if ok {
+		for _, ct := range tmp {
+			if ct == typeStr {
+				return true
+			}
+		}
+	}
+	return false
+}
