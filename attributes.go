@@ -286,7 +286,41 @@ func (a XAttr) ToArray() (ArrayAttribute, bool) {
 	return nil, false
 }
 
-// ================ End of attribute type definitions
+// ================ End of scalar attribute type definitions
+
+type CAttrArr struct {
+	Val []string
+}
+
+func (a CAttrArr) String() string {
+	return fmt.Sprintf("%v", a.Val)
+}
+
+func (a CAttrArr) AsStringArr() ([]string, error) {
+	return a.Val, nil
+}
+
+func (a CAttrArr) AsIntArr() ([]int, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a CAttrArr) AsDoubleArr() ([]float64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a CAttrArr) AsRefArr() ([]int64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a CAttrArr) AsPointArr() ([]Point, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a CAttrArr) AsDRefPairArr() ([]DRefPair, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+// ================ End of array attribute type definitions
 
 func (db *P4db) ContainerScalarAttr(id int64, attrName string) (attr Attribute, err error) {
 	c, err := db.GetContainerById(id)
@@ -347,7 +381,7 @@ func (db *P4db) ContainerScalarAttr(id int64, attrName string) (attr Attribute, 
 		log.Println("Unsupported attribute type")
 		panic("Unsupported attribute type " + t)
 	}
-	return nil, nil
+	return nil, err
 }
 
 func (db *P4db) ContainerArrayAttr(id int64, attrName string) (attr ArrayAttribute, err error) {
@@ -359,15 +393,26 @@ func (db *P4db) ContainerArrayAttr(id int64, attrName string) (attr ArrayAttribu
 	if err != nil {
 		return nil, err
 	}
-	if isArray {
-		return nil, fmt.Errorf("a scalar attribute expected")
+	if !isArray {
+		return nil, fmt.Errorf("an array attribute expected")
 	}
 	switch t {
+	case C:
+		log.Println("C case of attribute")
+		v := []dataValuesCDB{}
+		if err = db.C.Select(&v, "select * from DataValuesC where LinkMetaData=? and LinkContainer=? and Status='Actual'", ind, id); err == nil {
+			res := make([]string, len(v))
+			for i, x := range v {
+				res[i] = x.DataValue.String
+			}
+			attr = CAttrArr{Val: res}
+			return
+		}
 	default:
 		log.Println("Unsupported attribute type")
 		panic("Unsupported attribute type " + t)
 	}
-	return nil, nil
+	return nil, err
 }
 
 func (db *P4db) ContainerAttributes(id int64) (map[string]Attribute, error) {

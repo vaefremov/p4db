@@ -86,6 +86,8 @@ func TestContainerScalarAttr(t *testing.T) {
 		t.Error(err)
 	}
 
+	return
+
 	// X case
 	id = 428394
 	if val, err = db.ContainerScalarAttr(id, "boundaries"); err != nil {
@@ -104,6 +106,31 @@ func TestContainerScalarAttr(t *testing.T) {
 
 }
 
+func TestContainerArrayAttribute(t *testing.T) {
+	db, err := p4db.Connect(DSN)
+	if err != nil {
+		panic(err)
+	}
+	var id int64 = 14009832
+	var val p4db.ArrayAttribute
+	val, err = db.ContainerArrayAttr(id, "description1")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if resD, err := val.AsStringArr(); err == nil {
+		fmt.Printf("Attr value: %#v", resD)
+		if len(resD) != 6 {
+			t.Error("Unexpected array length", len(resD))
+			return
+		}
+
+	} else {
+		t.Error(err)
+	}
+
+}
+
 func ExampleContainerAttributes() {
 	db, err := p4db.Connect(DSN)
 	if err != nil {
@@ -112,7 +139,7 @@ func ExampleContainerAttributes() {
 	var id int64 = 330087
 	if attrs, err := db.ContainerAttributes(id); err == nil {
 		fmt.Printf("%v", attrs)
-		// Output: qq
+		// Output: map[path:qwerwqer/qwerwqer/qwerewqr]
 	} else {
 		panic(err)
 	}
