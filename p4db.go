@@ -24,9 +24,16 @@ type P4db struct {
 	C *sqlx.DB
 }
 
+// Connect acquires connection to MySQL from the pool and updates the MetaInf
+// structures if needed
 func Connect(dsn string) (res *P4db, err error) {
 	conn, err := sqlx.Connect("mysql", dsn)
-	return &P4db{C: conn}, err
+	if err == nil {
+		return &P4db{C: conn}, err
+	}
+	db := P4db{C: conn}
+	err = UpdateMetaInf(&db)
+	return &db, err
 }
 
 func MustConnect(dsn string) (res *P4db) {
@@ -82,14 +89,7 @@ func (db *P4db) CreateContainer(pid int64, typeStr string, name string) (id int6
 	return
 }
 
-type AttributeValue interface {
-	String() string
-}
-
-func (db *P4db) ContainerAttributes(id int64) (res []AttributeValue) {
-	return nil
-}
-
+// Close connection and return it to the pool
 func (db *P4db) Close() {
 	db.C.Close()
 }
