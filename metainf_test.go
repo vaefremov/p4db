@@ -40,10 +40,15 @@ func TestIndexByName(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ind, err := p4db.IndexByName("proj", "coordinateSystem")
+	ctype1 := "proj"
+	attr1 := "coordinateSystem"
+	ind, isArray, err := p4db.IndexByName(ctype1, attr1)
 	wanted_ind := int16(209)
 	if ind != wanted_ind {
 		t.Error("wanted " + string(wanted_ind) + " received " + string(ind))
+	}
+	if isArray {
+		t.Error(attr1 + " should be a scalar")
 	}
 }
 
