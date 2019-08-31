@@ -28,8 +28,8 @@ type P4db struct {
 // structures if needed
 func Connect(dsn string) (res *P4db, err error) {
 	conn, err := sqlx.Connect("mysql", dsn)
-	if err == nil {
-		return &P4db{C: conn}, err
+	if err != nil {
+		return nil, err
 	}
 	db := P4db{C: conn}
 	err = UpdateMetaInf(&db)
