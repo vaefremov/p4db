@@ -293,11 +293,11 @@ func (db *P4db) ContainerScalarAttr(id int64, attrName string) (attr Attribute, 
 	if err != nil {
 		return nil, err
 	}
-	ind, t, isAray, err := IndexByName(c.ContainerTypeStr, attrName)
+	ind, t, isArray, err := IndexByName(c.ContainerTypeStr, attrName)
 	if err != nil {
 		return nil, err
 	}
-	if isAray {
+	if isArray {
 		return nil, fmt.Errorf("a scalar attribute expected")
 	}
 	switch t {
@@ -350,7 +350,23 @@ func (db *P4db) ContainerScalarAttr(id int64, attrName string) (attr Attribute, 
 	return nil, nil
 }
 
-func (db *P4db) ContainerArrayAttr(id int64, attrName string) (ArrayAttribute, error) {
+func (db *P4db) ContainerArrayAttr(id int64, attrName string) (attr ArrayAttribute, err error) {
+	c, err := db.GetContainerById(id)
+	if err != nil {
+		return nil, err
+	}
+	ind, t, isArray, err := IndexByName(c.ContainerTypeStr, attrName)
+	if err != nil {
+		return nil, err
+	}
+	if isArray {
+		return nil, fmt.Errorf("a scalar attribute expected")
+	}
+	switch t {
+	default:
+		log.Println("Unsupported attribute type")
+		panic("Unsupported attribute type " + t)
+	}
 	return nil, nil
 }
 
