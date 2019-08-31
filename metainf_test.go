@@ -36,29 +36,27 @@ func TestUpdateMetaInf(t *testing.T) {
 func TestIndexByName(t *testing.T) {
 	db := mustInitialize()
 	defer db.Close()
-	err := p4db.UpdateMetaInf(db)
+	ctype1 := "proj"
+	attr1 := "coordinateSystem"
+	ind, tStr, isArray, err := p4db.IndexByName(ctype1, attr1)
 	if err != nil {
 		t.Error(err)
 	}
-	ctype1 := "proj"
-	attr1 := "coordinateSystem"
-	ind, isArray, err := p4db.IndexByName(ctype1, attr1)
 	wanted_ind := int16(209)
 	if ind != wanted_ind {
-		t.Error("wanted " + string(wanted_ind) + " received " + string(ind))
+		t.Errorf("wanted %v received %v ", wanted_ind, ind)
 	}
 	if isArray {
 		t.Error(attr1 + " should be a scalar")
+	}
+	if tStr != p4db.C {
+		t.Error(attr1 + " should be of type C")
 	}
 }
 
 func TestAttributeNames(t *testing.T) {
 	db := mustInitialize()
 	defer db.Close()
-	err := p4db.UpdateMetaInf(db)
-	if err != nil {
-		t.Error(err)
-	}
 	expRes := []string{"coordinateSystem", "path"}
 	res, _ := p4db.AttributeNames("proj")
 	if !reflect.DeepEqual(expRes, res) {
@@ -75,10 +73,6 @@ func TestAttributeNames(t *testing.T) {
 func ExampleGetContainerTypes() {
 	db := mustInitialize()
 	defer db.Close()
-	err := p4db.UpdateMetaInf(db)
-	if err != nil {
-		panic(err)
-	}
 	t := p4db.ContainerTypes()
 	k := "weld"
 	fmt.Println(k, t[k])
@@ -89,10 +83,6 @@ func ExampleGetContainerTypes() {
 func ExampleGetTypesHierarchy() {
 	db := mustInitialize()
 	defer db.Close()
-	err := p4db.UpdateMetaInf(db)
-	if err != nil {
-		panic(err)
-	}
 	tmp := p4db.TypesHierarchy()
 	k := "wel1"
 	v := tmp[k]
@@ -103,10 +93,6 @@ func ExampleGetTypesHierarchy() {
 func TestCanCreateSubcontainer(t *testing.T) {
 	db := mustInitialize()
 	defer db.Close()
-	err := p4db.UpdateMetaInf(db)
-	if err != nil {
-		panic(err)
-	}
 	cases := []struct {
 		in1, in2 string
 		exp      bool

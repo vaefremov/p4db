@@ -136,12 +136,12 @@ func UpdateMetaInf(db *P4db) (err error) {
 
 // IndexByName finds the ID of attribute () that can be used in subsequent requests.
 // Also it returns flag indicating if te attribute is an array
-func IndexByName(typeStr string, attributeName string) (ind int16, isArray bool, err error) {
+func IndexByName(typeStr string, attributeName string) (ind int16, typeFlag string, isArray bool, err error) {
 	descr, ok := attributes[ContainerAndAttributeNames{strings.ToLower(typeStr), strings.ToLower(attributeName)}]
 	if !ok {
 		ind, err = -1, errors.New("unknown attribute "+attributeName+" for typeStr "+typeStr)
 	}
-	return descr.Id, descr.IsArray, err
+	return descr.Id, descr.Type, descr.IsArray, err
 }
 
 func AttributeNames(typeStr string) (names []string, err error) {
