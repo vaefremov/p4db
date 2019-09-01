@@ -25,6 +25,7 @@ type ContainerAndAttributeNames struct {
 	ContainerType string
 	Name          string
 }
+
 type AttributeDescr struct {
 	Id int16
 	ContainerAndAttributeNames
@@ -149,7 +150,7 @@ func IndexByName(typeStr string, attributeName string) (ind int16, typeFlag stri
 	return descr.Id, descr.Type, descr.IsArray, err
 }
 
-func AttributeNames(typeStr string) (names []string, err error) {
+func AttributeNames(typeStr string) (names []string) {
 	names = []string{}
 	for k, v := range attributes {
 		if k.ContainerType == typeStr {
@@ -157,7 +158,7 @@ func AttributeNames(typeStr string) (names []string, err error) {
 		}
 	}
 	sort.Strings(names)
-	return names, err
+	return names
 }
 
 func ContainerTypes() map[string]string {
