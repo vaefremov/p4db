@@ -114,6 +114,39 @@ func TestTimeAttributes(t *testing.T) {
 
 }
 
+func TestFixedPointAttributes(t *testing.T) {
+	db, err := p4db.Connect(DSN)
+	if err != nil {
+		panic(err)
+	}
+	var id int64 = 2150
+	val, err := db.ContainerScalarAttr(id, "XShift")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("xshift", val)
+
+	val, err = db.ContainerScalarAttr(id, "YShift")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("yshift", val)
+
+	val, err = db.ContainerScalarAttr(id, "zcompression")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("zcompression", val)
+
+	id = 9621549
+	val, err = db.ContainerScalarAttr(id, "XShift")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("xshift", val)
+	t.Error()
+}
+
 func TestContainerArrayAttribute(t *testing.T) {
 	db, err := p4db.Connect(DSN)
 	if err != nil {

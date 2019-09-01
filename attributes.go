@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -619,6 +620,20 @@ func (db *P4db) ContainerScalarAttr(id int64, attrName string) (attr Attribute, 
 		var v dataValuesTDB
 		if err = db.C.Get(&v, "select * from DataValuesT where LinkMetaData=? and LinkContainer=? and Status='Actual'", ind, id); err == nil {
 			attr = TAttr{Val: v.DataValue}
+			return
+		}
+	case F: // Deprecated attribute type: fixed point float
+		log.Println("F case of attribute")
+		var v dataValuesRDB
+		if err = db.C.Get(&v, "select * from DataValuesF where LinkMetaData=? and LinkContainer=? and Status='Actual'", ind, id); err == nil {
+			switch strings.ToLower(attrName) {
+			case "xshift", "yshift", "zshift":
+				attr = DAttr{Val: float64(v.DataValue) / 100.}
+			case "zcompression":
+				attr = DAttr{Val: float64(v.DataValue) / 1000.}
+			default:
+				err = fmt.Errorf("unsupported fp float attribute %s", attrName)
+			}
 			return
 		}
 	default:
