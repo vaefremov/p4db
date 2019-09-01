@@ -88,6 +88,32 @@ func TestContainerScalarAttr(t *testing.T) {
 	}
 }
 
+func TestTimeAttributes(t *testing.T) {
+	db, err := p4db.Connect(DSN)
+	if err != nil {
+		panic(err)
+	}
+	var id int64 = 2248
+	val, err := db.ContainerScalarAttr(id, "start")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	exp := "2007-08-15 16:15:36"
+	tm := val.(p4db.TAttr).Val
+	res := tm.Format("2006-01-02 15:04:05")
+	fmt.Println(tm.Format("2006-01-02 15:04:05"))
+	fmt.Println(tm)
+	fmt.Println("Attr value: ", val)
+	if res != exp {
+		t.Fatal(exp, res)
+	}
+	if val.String() != exp {
+		t.Fatal("Conversion to string failed")
+	}
+
+}
+
 func TestContainerArrayAttribute(t *testing.T) {
 	db, err := p4db.Connect(DSN)
 	if err != nil {

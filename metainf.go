@@ -18,6 +18,7 @@ const (
 	P = "P"
 	R = "R"
 	X = "X"
+	T = "T"
 )
 
 type ContainerAndAttributeNames struct {

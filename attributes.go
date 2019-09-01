@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -86,6 +87,11 @@ type dataValuesXDB struct {
 	dataValuesDB
 	DataValueD float64 `db:"DataValueD"`
 	DataValueR int64   `db:"DataValueR"`
+}
+
+type dataValuesTDB struct {
+	dataValuesDB
+	DataValue time.Time `db:"DataValue"`
 }
 
 // ========= C case =============
@@ -283,6 +289,39 @@ func (a XAttr) AsDRefPair() (DRefPair, error) {
 }
 
 func (a XAttr) ToArray() (ArrayAttribute, bool) {
+	return nil, false
+}
+
+// ========= T case =============
+
+type TAttr struct {
+	Val time.Time
+}
+
+func (a TAttr) String() string {
+	return a.Val.Format("2006-01-02 15:04:05")
+}
+
+func (a TAttr) AsInt() (int, error) {
+	return 0, fmt.Errorf("conversion error")
+}
+
+func (a TAttr) AsDouble() (float64, error) {
+	return 0, fmt.Errorf("conversion error")
+}
+
+func (a TAttr) AsRef() (int64, error) {
+	return 0, fmt.Errorf("conversion error")
+}
+
+func (a TAttr) AsPoint() (Point, error) {
+	return Point{}, fmt.Errorf("conversion error")
+}
+func (a TAttr) AsDRefPair() (DRefPair, error) {
+	return DRefPair{}, fmt.Errorf("conversion error")
+}
+
+func (a TAttr) ToArray() (ArrayAttribute, bool) {
 	return nil, false
 }
 
@@ -485,6 +524,39 @@ func (a XAttrArr) AsDRefPairArr() ([]DRefPair, error) {
 	return a.Val, nil
 }
 
+//   ====== T ===========
+type TAttrArr struct {
+	Val []time.Time
+}
+
+func (a TAttrArr) String() string {
+	return fmt.Sprintf("%v", a.Val)
+}
+
+func (a TAttrArr) AsStringArr() ([]string, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a TAttrArr) AsIntArr() ([]int, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a TAttrArr) AsDoubleArr() ([]float64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a TAttrArr) AsRefArr() ([]int64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a TAttrArr) AsPointArr() ([]Point, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a TAttrArr) AsDRefPairArr() ([]DRefPair, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
 // ================ End of array attribute type definitions
 
 func (db *P4db) ContainerScalarAttr(id int64, attrName string) (attr Attribute, err error) {
@@ -542,9 +614,16 @@ func (db *P4db) ContainerScalarAttr(id int64, attrName string) (attr Attribute, 
 			attr = XAttr{ValD: v.DataValueD, ValR: v.DataValueR}
 			return
 		}
+	case T:
+		log.Println("T case of attribute")
+		var v dataValuesTDB
+		if err = db.C.Get(&v, "select * from DataValuesT where LinkMetaData=? and LinkContainer=? and Status='Actual'", ind, id); err == nil {
+			attr = TAttr{Val: v.DataValue}
+			return
+		}
 	default:
 		log.Println("Unsupported attribute type")
-		panic("Unsupported attribute type " + t)
+		err = fmt.Errorf("unsupported scalar attribute type: %s", t)
 	}
 	return nil, err
 }
@@ -630,7 +709,7 @@ func (db *P4db) ContainerArrayAttr(id int64, attrName string) (attr ArrayAttribu
 		}
 	default:
 		log.Println("Unsupported attribute type", t)
-		err = fmt.Errorf("unsupported attribute type: %s", t)
+		err = fmt.Errorf("unsupported array attribute type: %s", t)
 	}
 	return nil, err
 }
