@@ -3,7 +3,6 @@ package p4db_test
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/vaefremov/p4db"
 )
@@ -46,8 +45,14 @@ func TestGetSubContainersListAll(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	for i, c := range conts {
-		fmt.Println(i, c)
+	counter := map[string]int{}
+	for _, c := range conts {
+		// fmt.Println(i, c)
+		counter[c.Status] += 1
+	}
+	if counter["Actual"] == 0 || counter["Deleted"] == 0 {
+		fmt.Printf("Counter: %v", counter)
+		t.Error("no deleted or actual projects")
 	}
 }
 func TestGetSubContainersList(t *testing.T) {
@@ -57,11 +62,11 @@ func TestGetSubContainersList(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	for i, c := range conts {
+	for _, c := range conts {
 		if c.Status != "Actual" {
 			t.Fatalf("Wrong status: %#v, should be Actual", c)
 		}
-		fmt.Println(i, c)
+		// fmt.Println(i, c)
 	}
 }
 
@@ -73,14 +78,14 @@ func TestGetSubContainersListByType(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	for i, c := range conts {
+	for _, c := range conts {
 		if c.Status != "Actual" {
 			t.Fatalf("Wrong status: %#v, should be Actual", c)
 		}
 		if c.ContainerTypeStr != typeStr {
 			t.Fatalf("Wrong type str: %#v, should be %s", c, typeStr)
 		}
-		fmt.Println(i, c)
+		// fmt.Println(i, c)
 	}
 	// t.Error()
 }
@@ -91,5 +96,5 @@ func TestCreateContainer(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	time.Sleep(5 * time.Second)
+	// t.Error("Not implemented!")
 }

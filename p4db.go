@@ -3,7 +3,6 @@ package p4db
 import (
 	"database/sql"
 	"log"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -82,7 +81,7 @@ func (db *P4db) CreateContainer(pid int64, typeStr string, name string) (id int6
 		if err != nil {
 			return 0, err
 		}
-		time.Sleep(10 * time.Second)
+		// time.Sleep(10 * time.Second)
 		tx.Exec("unlock tables")
 		tx.Commit()
 	}

@@ -287,7 +287,7 @@ func (a XAttr) ToArray() (ArrayAttribute, bool) {
 }
 
 // ================ End of scalar attribute type definitions
-
+//   ====== C ===========
 type CAttrArr struct {
 	Val []string
 }
@@ -318,6 +318,171 @@ func (a CAttrArr) AsPointArr() ([]Point, error) {
 
 func (a CAttrArr) AsDRefPairArr() ([]DRefPair, error) {
 	return nil, fmt.Errorf("array conversion error")
+}
+
+//   ====== I ===========
+type IAttrArr struct {
+	Val []int
+}
+
+func (a IAttrArr) String() string {
+	return fmt.Sprintf("%v", a.Val)
+}
+
+func (a IAttrArr) AsStringArr() ([]string, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a IAttrArr) AsIntArr() ([]int, error) {
+	return a.Val, nil
+}
+
+func (a IAttrArr) AsDoubleArr() ([]float64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a IAttrArr) AsRefArr() ([]int64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a IAttrArr) AsPointArr() ([]Point, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a IAttrArr) AsDRefPairArr() ([]DRefPair, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+//   ====== D ===========
+type DAttrArr struct {
+	Val []float64
+}
+
+func (a DAttrArr) String() string {
+	return fmt.Sprintf("%v", a.Val)
+}
+
+func (a DAttrArr) AsStringArr() ([]string, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a DAttrArr) AsIntArr() ([]int, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a DAttrArr) AsDoubleArr() ([]float64, error) {
+	return a.Val, nil
+}
+
+func (a DAttrArr) AsRefArr() ([]int64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a DAttrArr) AsPointArr() ([]Point, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a DAttrArr) AsDRefPairArr() ([]DRefPair, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+//   ====== R ===========
+type RAttrArr struct {
+	Val []int64
+}
+
+func (a RAttrArr) String() string {
+	return fmt.Sprintf("%v", a.Val)
+}
+
+func (a RAttrArr) AsStringArr() ([]string, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a RAttrArr) AsIntArr() ([]int, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a RAttrArr) AsDoubleArr() ([]float64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a RAttrArr) AsRefArr() ([]int64, error) {
+	return a.Val, nil
+}
+
+func (a RAttrArr) AsPointArr() ([]Point, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a RAttrArr) AsDRefPairArr() ([]DRefPair, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+//   ====== R ===========
+type PAttrArr struct {
+	Val []Point
+}
+
+func (a PAttrArr) String() string {
+	return fmt.Sprintf("%v", a.Val)
+}
+
+func (a PAttrArr) AsStringArr() ([]string, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a PAttrArr) AsIntArr() ([]int, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a PAttrArr) AsDoubleArr() ([]float64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a PAttrArr) AsRefArr() ([]int64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a PAttrArr) AsPointArr() ([]Point, error) {
+	return a.Val, nil
+}
+
+func (a PAttrArr) AsDRefPairArr() ([]DRefPair, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+//   ====== X ===========
+type XAttrArr struct {
+	Val []DRefPair
+}
+
+func (a XAttrArr) String() string {
+	return fmt.Sprintf("%v", a.Val)
+}
+
+func (a XAttrArr) AsStringArr() ([]string, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a XAttrArr) AsIntArr() ([]int, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a XAttrArr) AsDoubleArr() ([]float64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a XAttrArr) AsRefArr() ([]int64, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a XAttrArr) AsPointArr() ([]Point, error) {
+	return nil, fmt.Errorf("array conversion error")
+}
+
+func (a XAttrArr) AsDRefPairArr() ([]DRefPair, error) {
+	return a.Val, nil
 }
 
 // ================ End of array attribute type definitions
@@ -408,9 +573,64 @@ func (db *P4db) ContainerArrayAttr(id int64, attrName string) (attr ArrayAttribu
 			attr = CAttrArr{Val: res}
 			return
 		}
+	case I:
+		log.Println("I case of attribute")
+		v := []dataValuesIDB{}
+		if err = db.C.Select(&v, "select * from DataValuesI where LinkMetaData=? and LinkContainer=? and Status='Actual'", ind, id); err == nil {
+			res := make([]int, len(v))
+			for i, x := range v {
+				res[i] = int(x.DataValue)
+			}
+			attr = IAttrArr{Val: res}
+			return
+		}
+	case D:
+		log.Println("D case of attribute")
+		v := []dataValuesDDB{}
+		if err = db.C.Select(&v, "select * from DataValuesD where LinkMetaData=? and LinkContainer=? and Status='Actual'", ind, id); err == nil {
+			res := make([]float64, len(v))
+			for i, x := range v {
+				res[i] = x.DataValue
+			}
+			attr = DAttrArr{Val: res}
+			return
+		}
+	case R:
+		log.Println("R case of attribute")
+		v := []dataValuesRDB{}
+		if err = db.C.Select(&v, "select * from DataValuesR where LinkMetaData=? and LinkContainer=? and Status='Actual'", ind, id); err == nil {
+			res := make([]int64, len(v))
+			for i, x := range v {
+				res[i] = x.DataValue
+			}
+			attr = RAttrArr{Val: res}
+			return
+		}
+	case P:
+		log.Println("P case of attribute")
+		v := []dataValuesPDB{}
+		if err = db.C.Select(&v, "select * from DataValuesP where LinkMetaData=? and LinkContainer=? and Status='Actual'", ind, id); err == nil {
+			res := make([]Point, len(v))
+			for i, x := range v {
+				res[i] = Point{X: x.DataValueX, Y: x.DataValueY, Z: x.DataValueZ}
+			}
+			attr = PAttrArr{Val: res}
+			return
+		}
+	case X:
+		log.Println("P case of attribute")
+		v := []dataValuesXDB{}
+		if err = db.C.Select(&v, "select * from DataValuesX where LinkMetaData=? and LinkContainer=? and Status='Actual'", ind, id); err == nil {
+			res := make([]DRefPair, len(v))
+			for i, x := range v {
+				res[i] = DRefPair{ValD: x.DataValueD, Ref: x.DataValueR}
+			}
+			attr = XAttrArr{Val: res}
+			return
+		}
 	default:
-		log.Println("Unsupported attribute type")
-		panic("Unsupported attribute type " + t)
+		log.Println("Unsupported attribute type", t)
+		err = fmt.Errorf("unsupported attribute type: %s", t)
 	}
 	return nil, err
 }

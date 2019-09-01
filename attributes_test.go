@@ -3,6 +3,7 @@ package p4db_test
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"testing"
 
 	"github.com/vaefremov/p4db"
@@ -85,25 +86,6 @@ func TestContainerScalarAttr(t *testing.T) {
 	} else {
 		t.Error(err)
 	}
-
-	return
-
-	// X case
-	id = 428394
-	if val, err = db.ContainerScalarAttr(id, "boundaries"); err != nil {
-		t.Error(err)
-		return
-	}
-	if resD, err := val.AsDRefPair(); err == nil {
-		exp := p4db.DRefPair{3406.48, 4467173}
-		fmt.Printf("Attr value: %v", resD)
-		if math.Abs(resD.ValD-exp.ValD) > 1. || resD.Ref != exp.Ref {
-			t.Error(math.Abs(resD.ValD-exp.ValD), resD.Ref)
-		}
-	} else {
-		t.Error(err)
-	}
-
 }
 
 func TestContainerArrayAttribute(t *testing.T) {
@@ -119,12 +101,99 @@ func TestContainerArrayAttribute(t *testing.T) {
 		return
 	}
 	if resD, err := val.AsStringArr(); err == nil {
-		fmt.Printf("Attr value: %#v", resD)
+		fmt.Printf("Attr value: %#v\n", resD)
 		if len(resD) != 6 {
 			t.Error("Unexpected array length", len(resD))
 			return
 		}
 
+	} else {
+		t.Error(err)
+	}
+
+	// I case
+	id = 13
+	if val, err = db.ContainerArrayAttr(id, "CDP"); err != nil {
+		t.Error(err)
+		return
+	}
+	if resD, err := val.AsIntArr(); err == nil {
+		exp := [...]int{1, 31, 32}
+		fmt.Printf("Attr value: %v\n", resD)
+		for i, x := range exp {
+			if x != resD[i] {
+				t.Error(i, exp[i], resD[i])
+			}
+		}
+	} else {
+		t.Error(err)
+	}
+	// D case
+	id = 8312990
+	if val, err = db.ContainerArrayAttr(id, "filterParameters"); err != nil {
+		t.Error(err)
+		return
+	}
+	if resD, err := val.AsDoubleArr(); err == nil {
+		fmt.Printf("Attr value: %v\n", resD)
+		exp := []float64{10, 20, 70, 80}
+
+		if !reflect.DeepEqual(exp, resD) {
+			fmt.Printf("%T %T\n", exp, resD)
+			t.Error(exp, resD)
+		}
+	} else {
+		t.Error(err)
+	}
+
+	// R case
+	id = 1294
+	if val, err = db.ContainerArrayAttr(id, "Refs2horl"); err != nil {
+		t.Error(err)
+		return
+	}
+	if resD, err := val.AsRefArr(); err == nil {
+		fmt.Printf("Attr value: %v\n", resD)
+		exp := [...]int64{277, 273, 269, 265, 261}
+
+		if !reflect.DeepEqual(exp[:5], resD[:5]) {
+			fmt.Printf("%T %T\n", exp, resD)
+			t.Error(exp, resD)
+		}
+	} else {
+		t.Error(err)
+	}
+
+	// P case
+	id = 13
+	if val, err = db.ContainerArrayAttr(id, "Geometry"); err != nil {
+		t.Error(err)
+		return
+	}
+	if resD, err := val.AsPointArr(); err == nil {
+		fmt.Printf("Attr value: %v\n", resD)
+		exp := p4db.Point{1000250, 735725, 0}
+
+		if !reflect.DeepEqual(exp, resD[0]) {
+			fmt.Printf("%T %T\n", exp, resD)
+			t.Error(exp, resD)
+		}
+	} else {
+		t.Error(err)
+	}
+
+	// X case
+	id = 428394
+	if val, err = db.ContainerArrayAttr(id, "boundaries"); err != nil {
+		t.Error(err)
+		return
+	}
+	if resD, err := val.AsDRefPairArr(); err == nil {
+		exp := p4db.DRefPair{3406.48, 4467173}
+		fmt.Printf("Attr value: %v\n", resD)
+		if math.Abs(resD[0].ValD-exp.ValD) > 1. || resD[0].Ref != exp.Ref {
+			t.Error(math.Abs(resD[0].ValD-exp.ValD), resD[0].Ref)
+		}
 	} else {
 		t.Error(err)
 	}
