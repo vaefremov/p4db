@@ -729,9 +729,26 @@ func (db *P4db) ContainerArrayAttr(id int64, attrName string) (attr ArrayAttribu
 	return nil, err
 }
 
-func (db *P4db) ContainerAttributes(id int64) (map[string]Attribute, error) {
+func (db *P4db) ContainerAttributes(id int64) (res map[string]interface{}, err error) {
 	log.Println(id)
-	res := make(map[string]Attribute)
-	res["path"] = CAttr{Val: "qwerwqer/qwerwqer/qwerewqr"}
+	c, err := db.GetContainerById(id)
+	if err != nil {
+		return nil, err
+	}
+	res = make(map[string]interface{})
+	typeStr := c.ContainerTypeStr
+	for _, aName := range AttributeNames(typeStr) {
+		_, _, isArray, _ := IndexByName(typeStr, aName)
+		switch isArray {
+		case false:
+			if attr, err := db.ContainerScalarAttr(id, aName); err == nil {
+				res[aName] = attr
+			}
+		case true:
+			if attr, err := db.ContainerArrayAttr(id, aName); err == nil {
+				res[aName] = attr
+			}
+		}
+	}
 	return res, nil
 }

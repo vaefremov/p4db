@@ -144,7 +144,7 @@ func TestFixedPointAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println("xshift", val)
-	t.Error()
+	// t.Error()
 }
 
 func TestContainerArrayAttribute(t *testing.T) {
@@ -267,8 +267,24 @@ func ExampleContainerAttributes() {
 	var id int64 = 330087
 	if attrs, err := db.ContainerAttributes(id); err == nil {
 		fmt.Printf("%v", attrs)
-		// Output: map[path:qwerwqer/qwerwqer/qwerewqr]
+		// Output: map[coordinateSystem:Pulkovo 1942 / Gauss-Kruger zone 12 path:test2_1188536112.19]
 	} else {
 		panic(err)
 	}
+}
+
+func TestContainerAttributes(t *testing.T) {
+	db, err := p4db.Connect(DSN)
+	if err != nil {
+		panic(err)
+	}
+	var id int64 = 13
+	if attrs, err := db.ContainerAttributes(id); err == nil {
+		for aName, attrVal := range attrs {
+			fmt.Println(aName, attrVal)
+		}
+	} else {
+		t.Fatal(err)
+	}
+	// t.Error()
 }
