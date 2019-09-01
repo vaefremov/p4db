@@ -100,6 +100,7 @@ func TestCanCreateSubcontainer(t *testing.T) {
 		{"root", "proj", true},
 		{"proj", "wel1", true},
 		{"proj", "qqq", false},
+		{"wel1", "weld", true},
 	}
 	for _, c := range cases {
 		res := p4db.CanCreateSubcontainer(c.in1, c.in2)
