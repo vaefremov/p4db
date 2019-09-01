@@ -2,6 +2,7 @@ package p4db
 
 import (
 	"database/sql"
+	"log"
 	"sort"
 	"strings"
 	"sync"
@@ -60,11 +61,10 @@ var specialNamesForFixingCase = map[string]string{
 }
 
 var (
-	mu             sync.Mutex
+	once           sync.Once
 	containerTypes map[string]string
 	typeHierarchy  map[string][]string
 	attributes     map[ContainerAndAttributeNames]AttributeDescr
-	isValid        bool
 )
 
 func lowercaseFirstChar(name string) (res string) {
@@ -115,21 +115,25 @@ func fillTypeHierarchy(db *P4db) (err error) {
 // UpdateMetaInf updates internal data structures reading them from the DB.
 // The update process is performed only once, the corresponding flag isValid is set
 func UpdateMetaInf(db *P4db) (err error) {
-	mu.Lock()
-	defer mu.Unlock()
-	if !isValid {
-		err = fillContainerTypes(db)
-		if err != nil {
-			return
-		}
-		err = fillTypeHierarchy(db)
-		if err != nil {
-			return
-		}
-		err = fillAttributes(db)
-		if err != nil {
-			return
-		}
+	once.Do(func() {
+		err = fillAll(db)
+	})
+	return
+}
+
+func fillAll(db *P4db) (err error) {
+	log.Println("Inititalizing MetaInf")
+	err = fillContainerTypes(db)
+	if err != nil {
+		return
+	}
+	err = fillTypeHierarchy(db)
+	if err != nil {
+		return
+	}
+	err = fillAttributes(db)
+	if err != nil {
+		return
 	}
 	return
 }
