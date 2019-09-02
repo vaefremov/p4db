@@ -89,6 +89,24 @@ func TestGetSubContainersListByType(t *testing.T) {
 	}
 	// t.Error()
 }
+func TestGetSubContainersListByTypeWc(t *testing.T) {
+	db := p4db.MustConnect(DSN)
+	defer db.Close()
+	typeStr := "proj"
+	conts, err := db.GetSubContainersListByTypeWc(1, typeStr, "test_%")
+	if err != nil {
+		t.Error(err.Error())
+	}
+	for _, c := range conts {
+		if c.Status != "Actual" {
+			t.Fatalf("Wrong status: %#v, should be Actual", c)
+		}
+		if c.ContainerTypeStr != typeStr {
+			t.Fatalf("Wrong type str: %#v, should be %s", c, typeStr)
+		}
+		// fmt.Println(c)
+	}
+}
 
 func TestCreateContainer(t *testing.T) {
 	db := p4db.MustConnect(DSN)
@@ -99,16 +117,15 @@ func TestCreateContainer(t *testing.T) {
 	// t.Error("Not implemented!")
 }
 
-func TestProjectsNamePath(t *testing.T) {
+func TestProjectsNamePathWc(t *testing.T) {
 	db := p4db.MustConnect(DSN)
-	if tmp, err := db.ProjectsNamePath(); err == nil {
+	if tmp, err := db.ProjectsNamePathWc("test2%"); err == nil {
 		fmt.Println(tmp)
 	} else {
 		t.Error(err)
 	}
-	// t.Error()
+	t.Error()
 }
-
 
 func TestProjectsNamePathState(t *testing.T) {
 	db := p4db.MustConnect(DSN)

@@ -75,6 +75,13 @@ func (db *P4db) GetSubContainersListByType(pid int64, typeStr string) (res []Con
 	return
 }
 
+func (db *P4db) GetSubContainersListByTypeWc(pid int64, typeStr string, wc string) (res []Container, err error) {
+	conn := *db.C
+	res = []Container{}
+	err = conn.Select(&res, "select * from Containers where LinkUp=? and Status='Actual' and ContainerType=? and ContainerName like ?", pid, typeStr, wc)
+	return
+}
+
 func (db *P4db) CreateContainer(pid int64, typeStr string, name string) (id int64, err error) {
 	conn := *db.C
 	if tx, err := conn.Begin(); err == nil {
@@ -98,7 +105,7 @@ func (db *P4db) Close() {
 // ======= Special purpose functions
 
 type NamePath struct {
-	Id int64
+	Id   int64
 	Name string
 	Path string
 }
@@ -109,7 +116,11 @@ type NamePathState struct {
 }
 
 func (db *P4db) ProjectsNamePath() (res []NamePath, err error) {
-	cList, err := db.GetSubContainersListByType(REPOSITORY_ID, "proj")
+	return db.ProjectsNamePathWc("%")
+}
+
+func (db *P4db) ProjectsNamePathWc(wc string) (res []NamePath, err error) {
+	cList, err := db.GetSubContainersListByTypeWc(REPOSITORY_ID, "proj", wc)
 	if err != nil {
 		return
 	}
@@ -139,10 +150,10 @@ func (db *P4db) ProjectsNamePathState() (res []NamePathState, err error) {
 		res[i] = NamePathState{NamePath{c.CodeContainer, c.ContainerName, ""}, cStatus}
 		if pattr, err := db.ContainerScalarAttr(c.CodeContainer, "path"); err == nil {
 			res[i].Path = pattr.String()
-		} else {		
+		} else {
 			log.Println("Warning:", err)
 		}
-		
+
 	}
 	return
 }
