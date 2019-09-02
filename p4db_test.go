@@ -98,3 +98,25 @@ func TestCreateContainer(t *testing.T) {
 	}
 	// t.Error("Not implemented!")
 }
+
+func TestProjectsNamePath(t *testing.T) {
+	db := p4db.MustConnect(DSN)
+	if tmp, err := db.ProjectsNamePath(); err == nil {
+		fmt.Println(tmp)
+	} else {
+		t.Error(err)
+	}
+	// t.Error()
+}
+
+
+func TestProjectsNamePathState(t *testing.T) {
+	db := p4db.MustConnect(DSN)
+	if tmp, err := db.ProjectsNamePathState(); err == nil {
+		fmt.Println(tmp)
+	} else {
+		t.Error(err)
+	}
+	// t.Error()
+
+}

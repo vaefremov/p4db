@@ -19,6 +19,8 @@ type Container struct {
 	IsProtected      bool          `db:"isProtected"`
 }
 
+const REPOSITORY_ID = int64(1)
+
 type P4db struct {
 	C *sqlx.DB
 }
@@ -91,4 +93,55 @@ func (db *P4db) CreateContainer(pid int64, typeStr string, name string) (id int6
 // Close connection and return it to the pool
 func (db *P4db) Close() {
 	db.C.Close()
+}
+
+// ======= Special purpose functions
+
+type NamePath struct {
+	Name string
+	Path string
+}
+
+type NamePathState struct {
+	NamePath
+	IsActual bool
+}
+
+func (db *P4db) ProjectsNamePath() (res []NamePath, err error) {
+	cList, err := db.GetSubContainersListByType(REPOSITORY_ID, "proj")
+	if err != nil {
+		return
+	}
+	res = make([]NamePath, len(cList))
+	for i, c := range cList {
+		pattr, err := db.ContainerScalarAttr(c.CodeContainer, "path")
+		if err != nil {
+			log.Println("Warning:", err)
+			continue
+		}
+		res[i] = NamePath{Name: c.ContainerName, Path: pattr.String()}
+	}
+	return
+}
+
+func (db *P4db) ProjectsNamePathState() (res []NamePathState, err error) {
+	cList, err := db.GetSubContainersListAll(REPOSITORY_ID, false)
+	if err != nil {
+		return
+	}
+	res = make([]NamePathState, len(cList))
+	for i, c := range cList {
+		if c.ContainerTypeStr != "proj" {
+			continue
+		}
+		cStatus := c.Status == "Actual"
+		res[i] = NamePathState{NamePath{c.ContainerName, ""}, cStatus}
+		if pattr, err := db.ContainerScalarAttr(c.CodeContainer, "path"); err == nil {
+			res[i].Path = pattr.String()
+		} else {		
+			log.Println("Warning:", err)
+		}
+		
+	}
+	return
 }
