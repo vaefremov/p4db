@@ -98,6 +98,7 @@ func (db *P4db) Close() {
 // ======= Special purpose functions
 
 type NamePath struct {
+	Id int64
 	Name string
 	Path string
 }
@@ -119,7 +120,7 @@ func (db *P4db) ProjectsNamePath() (res []NamePath, err error) {
 			log.Println("Warning:", err)
 			continue
 		}
-		res[i] = NamePath{Name: c.ContainerName, Path: pattr.String()}
+		res[i] = NamePath{Name: c.ContainerName, Path: pattr.String(), Id: c.CodeContainer}
 	}
 	return
 }
@@ -135,7 +136,7 @@ func (db *P4db) ProjectsNamePathState() (res []NamePathState, err error) {
 			continue
 		}
 		cStatus := c.Status == "Actual"
-		res[i] = NamePathState{NamePath{c.ContainerName, ""}, cStatus}
+		res[i] = NamePathState{NamePath{c.CodeContainer, c.ContainerName, ""}, cStatus}
 		if pattr, err := db.ContainerScalarAttr(c.CodeContainer, "path"); err == nil {
 			res[i].Path = pattr.String()
 		} else {		
