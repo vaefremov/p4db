@@ -110,50 +110,38 @@ type NamePath struct {
 	Path string
 }
 
-type NamePathState struct {
-	NamePath
-	IsActual bool
-}
-
 func (db *P4db) ProjectsNamePath() (res []NamePath, err error) {
-	return db.ProjectsNamePathWc("%")
-}
-
-func (db *P4db) ProjectsNamePathWc(wc string) (res []NamePath, err error) {
-	cList, err := db.GetSubContainersListByTypeWc(REPOSITORY_ID, "proj", wc)
+	tmp, err := db.SubContainersListWithCAttributeByType(REPOSITORY_ID, "proj", "path")
 	if err != nil {
 		return
 	}
-	res = make([]NamePath, len(cList))
-	for i, c := range cList {
-		pattr, err := db.ContainerScalarAttr(c.CodeContainer, "path")
-		if err != nil {
-			log.Println("Warning:", err)
-			continue
-		}
-		res[i] = NamePath{Name: c.ContainerName, Path: pattr.String(), Id: c.CodeContainer}
+	res = make([]NamePath, len(tmp))
+	for i, p := range tmp {
+		res[i] = NamePath{Id: p.CodeContainer, Name: p.ContainerName, Path: p.CAttr}
 	}
 	return
 }
 
-func (db *P4db) ProjectsNamePathState() (res []NamePathState, err error) {
-	cList, err := db.GetSubContainersListAll(REPOSITORY_ID, false)
+type ContainerAndPath struct {
+	CodeContainer    int64         `db:"CodeContainer"`
+	ContainerTypeStr string        `db:"ContainerType"`
+	ContainerName    string        `db:"ContainerName"`
+	OwnerID          sql.NullInt64 `db:"ownerID"`
+	IsProtected      bool          `db:"isProtected"`
+	CAttr            string        `db:"DataValue"`
+}
+
+func (db *P4db) SubContainersListWithCAttributeByType(pid int64, typeStr, attrName string) (res []ContainerAndPath, err error) {
+	attrID, _, _, err := IndexByName(typeStr, attrName)
 	if err != nil {
 		return
 	}
-	res = make([]NamePathState, len(cList))
-	for i, c := range cList {
-		if c.ContainerTypeStr != "proj" {
-			continue
-		}
-		cStatus := c.Status == "Actual"
-		res[i] = NamePathState{NamePath{c.CodeContainer, c.ContainerName, ""}, cStatus}
-		if pattr, err := db.ContainerScalarAttr(c.CodeContainer, "path"); err == nil {
-			res[i].Path = pattr.String()
-		} else {
-			log.Println("Warning:", err)
-		}
-
-	}
+	conn := *db.C
+	res = []ContainerAndPath{}
+	sqlTmpl := `select c.CodeContainer, c.ContainerType, c.ContainerName, c.ownerID, c.isProtected, d.DataValue  
+	from Containers c left join DataValuesC d on c.CodeContainer=d.LinkContainer 
+	where c.Status='Actual' and d.Status = 'Actual' and c.LinkUp=? and c.ContainerType=? and d.LinkMetaData=?
+	`
+	err = conn.Select(&res, sqlTmpl, pid, typeStr, attrID)
 	return
 }

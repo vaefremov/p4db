@@ -117,23 +117,22 @@ func TestCreateContainer(t *testing.T) {
 	// t.Error("Not implemented!")
 }
 
-func TestProjectsNamePathWc(t *testing.T) {
+func TestProjectsNamePath(t *testing.T) {
 	db := p4db.MustConnect(DSN)
-	if tmp, err := db.ProjectsNamePathWc("test2%"); err == nil {
-		fmt.Println(tmp)
-	} else {
-		t.Error(err)
-	}
-	t.Error()
-}
-
-func TestProjectsNamePathState(t *testing.T) {
-	db := p4db.MustConnect(DSN)
-	if tmp, err := db.ProjectsNamePathState(); err == nil {
+	if tmp, err := db.ProjectsNamePath(); err == nil {
 		fmt.Println(tmp)
 	} else {
 		t.Error(err)
 	}
 	// t.Error()
+}
 
+func TestSubContainersListWithCAttributeByType(t *testing.T) {
+	db := p4db.MustConnect(DSN)
+	if tmp, err := db.SubContainersListWithCAttributeByType(1, "proj", "path"); err == nil {
+		fmt.Println(tmp)
+	} else {
+		t.Error(err)
+	}
+	// t.Error()
 }
