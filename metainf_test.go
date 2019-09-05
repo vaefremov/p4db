@@ -13,7 +13,7 @@ const (
 )
 
 func mustInitialize() *p4db.P4db {
-	db, err := p4db.Connect(DSN1)
+	db, err := p4db.New(DSN1)
 	if err != nil {
 		panic(err)
 	}
@@ -21,8 +21,7 @@ func mustInitialize() *p4db.P4db {
 }
 
 func TestUpdateMetaInf(t *testing.T) {
-	db, err := p4db.Connect(DSN1)
-	defer db.Close()
+	db, err := p4db.New(DSN1)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -34,8 +33,7 @@ func TestUpdateMetaInf(t *testing.T) {
 }
 
 func TestIndexByName(t *testing.T) {
-	db := mustInitialize()
-	defer db.Close()
+	_ = mustInitialize()
 	ctype1 := "proj"
 	attr1 := "coordinateSystem"
 	ind, tStr, isArray, err := p4db.IndexByName(ctype1, attr1)
@@ -55,8 +53,7 @@ func TestIndexByName(t *testing.T) {
 }
 
 func TestAttributeNames(t *testing.T) {
-	db := mustInitialize()
-	defer db.Close()
+	_ = mustInitialize()
 	expRes := []string{"coordinateSystem", "path"}
 	res := p4db.AttributeNames("proj")
 	if !reflect.DeepEqual(expRes, res) {
@@ -71,8 +68,7 @@ func TestAttributeNames(t *testing.T) {
 }
 
 func ExampleGetContainerTypes() {
-	db := mustInitialize()
-	defer db.Close()
+	_ = mustInitialize()
 	t := p4db.ContainerTypes()
 	k := "weld"
 	fmt.Println(k, t[k])
@@ -81,8 +77,7 @@ func ExampleGetContainerTypes() {
 }
 
 func ExampleGetTypesHierarchy() {
-	db := mustInitialize()
-	defer db.Close()
+	_ = mustInitialize()
 	tmp := p4db.TypesHierarchy()
 	k := "wel1"
 	v := tmp[k]
@@ -91,8 +86,7 @@ func ExampleGetTypesHierarchy() {
 }
 
 func TestCanCreateSubcontainer(t *testing.T) {
-	db := mustInitialize()
-	defer db.Close()
+	_ = mustInitialize()
 	cases := []struct {
 		in1, in2 string
 		exp      bool

@@ -12,8 +12,7 @@ const (
 )
 
 func TestConnect(t *testing.T) {
-	db, err := p4db.Connect(DSN)
-	defer db.Close()
+	db, err := p4db.New(DSN)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -26,8 +25,7 @@ func TestConnect(t *testing.T) {
 }
 
 func TestGetContainerById(t *testing.T) {
-	db := p4db.MustConnect(DSN)
-	defer db.Close()
+	db := p4db.MustNew(DSN)
 	id := int64(1)
 	cont, err := db.GetContainerById(id)
 	if cont.CodeContainer != id {
@@ -39,8 +37,7 @@ func TestGetContainerById(t *testing.T) {
 }
 
 func TestGetSubContainersListAll(t *testing.T) {
-	db := p4db.MustConnect(DSN)
-	defer db.Close()
+	db := p4db.MustNew(DSN)
 	conts, err := db.GetSubContainersListAll(1, false)
 	if err != nil {
 		t.Error(err.Error())
@@ -56,8 +53,7 @@ func TestGetSubContainersListAll(t *testing.T) {
 	}
 }
 func TestGetSubContainersList(t *testing.T) {
-	db := p4db.MustConnect(DSN)
-	defer db.Close()
+	db := p4db.MustNew(DSN)
 	conts, err := db.GetSubContainersList(1)
 	if err != nil {
 		t.Error(err.Error())
@@ -71,8 +67,7 @@ func TestGetSubContainersList(t *testing.T) {
 }
 
 func TestGetSubContainersListByType(t *testing.T) {
-	db := p4db.MustConnect(DSN)
-	defer db.Close()
+	db := p4db.MustNew(DSN)
 	typeStr := "lin1"
 	conts, err := db.GetSubContainersListByType(3, typeStr)
 	if err != nil {
@@ -90,8 +85,7 @@ func TestGetSubContainersListByType(t *testing.T) {
 	// t.Error()
 }
 func TestGetSubContainersListByTypeWc(t *testing.T) {
-	db := p4db.MustConnect(DSN)
-	defer db.Close()
+	db := p4db.MustNew(DSN)
 	typeStr := "proj"
 	conts, err := db.GetSubContainersListByTypeWc(1, typeStr, "test_%")
 	if err != nil {
@@ -109,7 +103,7 @@ func TestGetSubContainersListByTypeWc(t *testing.T) {
 }
 
 func TestCreateContainer(t *testing.T) {
-	db := p4db.MustConnect(DSN)
+	db := p4db.MustNew(DSN)
 	_, err := db.CreateContainer(1, "qqq", "Some name")
 	if err != nil {
 		t.Error(err.Error())
@@ -118,7 +112,7 @@ func TestCreateContainer(t *testing.T) {
 }
 
 func TestProjectsNamePath(t *testing.T) {
-	db := p4db.MustConnect(DSN)
+	db := p4db.MustNew(DSN)
 	if tmp, err := db.ProjectsNamePath(); err == nil {
 		fmt.Println(tmp)
 	} else {
@@ -128,7 +122,7 @@ func TestProjectsNamePath(t *testing.T) {
 }
 
 func TestSubContainersListWithCAttributeByType(t *testing.T) {
-	db := p4db.MustConnect(DSN)
+	db := p4db.MustNew(DSN)
 	if tmp, err := db.SubContainersListWithCAttributeByType(1, "proj", "path"); err == nil {
 		fmt.Println(tmp)
 	} else {

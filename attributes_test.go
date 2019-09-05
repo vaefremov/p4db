@@ -10,7 +10,7 @@ import (
 )
 
 func TestContainerScalarAttr(t *testing.T) {
-	db, err := p4db.Connect(DSN)
+	db, err := p4db.New(DSN)
 	if err != nil {
 		panic(err)
 	}
@@ -89,7 +89,7 @@ func TestContainerScalarAttr(t *testing.T) {
 }
 
 func TestTimeAttributes(t *testing.T) {
-	db, err := p4db.Connect(DSN)
+	db, err := p4db.New(DSN)
 	if err != nil {
 		panic(err)
 	}
@@ -115,7 +115,7 @@ func TestTimeAttributes(t *testing.T) {
 }
 
 func TestFixedPointAttributes(t *testing.T) {
-	db, err := p4db.Connect(DSN)
+	db, err := p4db.New(DSN)
 	if err != nil {
 		panic(err)
 	}
@@ -148,7 +148,7 @@ func TestFixedPointAttributes(t *testing.T) {
 }
 
 func TestContainerArrayAttribute(t *testing.T) {
-	db, err := p4db.Connect(DSN)
+	db, err := p4db.New(DSN)
 	if err != nil {
 		panic(err)
 	}
@@ -260,7 +260,7 @@ func TestContainerArrayAttribute(t *testing.T) {
 }
 
 func ExampleContainerAttributes() {
-	db, err := p4db.Connect(DSN)
+	db, err := p4db.New(DSN)
 	if err != nil {
 		panic(err)
 	}
@@ -274,7 +274,7 @@ func ExampleContainerAttributes() {
 }
 
 func TestContainerAttributes(t *testing.T) {
-	db, err := p4db.Connect(DSN)
+	db, err := p4db.New(DSN)
 	if err != nil {
 		panic(err)
 	}
