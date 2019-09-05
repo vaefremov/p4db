@@ -34,7 +34,7 @@ var (
 
 // Connect acquires connection to MySQL from the pool and updates the MetaInf
 // structures if needed
-func Connect(dsn string) (res *P4db, err error) {
+func New(dsn string) (res *P4db, err error) {
 	createConnOnce.Do(func() {
 		conn, err := sqlx.Connect("mysql", dsn)
 		if err != nil {
@@ -48,8 +48,8 @@ func Connect(dsn string) (res *P4db, err error) {
 	return &p4dbConn, p4dbConnErr
 }
 
-func MustConnect(dsn string) (res *P4db) {
-	db, err := Connect(dsn)
+func MustNew(dsn string) (res *P4db) {
+	db, err := New(dsn)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -109,7 +109,7 @@ func (db *P4db) CreateContainer(pid int64, typeStr string, name string) (id int6
 }
 
 // Close connections pool
-func (db *P4db) Close() {
+func (db *P4db) ClosePull() {
 	db.C.Close()
 }
 
