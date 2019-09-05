@@ -3,6 +3,7 @@ package p4db
 import (
 	"database/sql"
 	"log"
+	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -25,16 +26,26 @@ type P4db struct {
 	C *sqlx.DB
 }
 
+var (
+	p4dbConn P4db
+	p4dbConnErr error
+	createConnOnce sync.Once
+)
+
 // Connect acquires connection to MySQL from the pool and updates the MetaInf
 // structures if needed
 func Connect(dsn string) (res *P4db, err error) {
-	conn, err := sqlx.Connect("mysql", dsn)
-	if err != nil {
-		return nil, err
-	}
-	db := P4db{C: conn}
-	err = UpdateMetaInf(&db)
-	return &db, err
+	createConnOnce.Do(func() {
+		conn, err := sqlx.Connect("mysql", dsn)
+		if err != nil {
+			p4dbConnErr = err
+			return
+		}
+		log.Println("Db connections pool initialized")
+		p4dbConn = P4db{C: conn}
+		p4dbConnErr = UpdateMetaInf(&p4dbConn)
+	} )
+	return &p4dbConn, p4dbConnErr
 }
 
 func MustConnect(dsn string) (res *P4db) {
@@ -97,7 +108,7 @@ func (db *P4db) CreateContainer(pid int64, typeStr string, name string) (id int6
 	return
 }
 
-// Close connection and return it to the pool
+// Close connections pool
 func (db *P4db) Close() {
 	db.C.Close()
 }
