@@ -1,6 +1,7 @@
 package p4db
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -63,5 +64,19 @@ type changeLogDB struct {
 func (db *P4db) LogRecords(id int64, tableName string) (res []changeLogDB, err error) {
 	res = []changeLogDB{}
 	err = db.C.Select(&res, "select * from ChangeLog where Link=? and TableType=?", id, tableName)
+	return
+}
+
+type usersDB struct {
+	UserID   int16  `db:"UserID"`
+	UserName string `db:"UserName"`
+	// UserPwd     sql.NullString `db:"UserPwd"`
+	UserComment sql.NullString `db:"UserComment"`
+	IsDbAdmin   int8           `db:"IsDbAdmin"`
+}
+
+func (db *P4db) Users() (res []usersDB, err error) {
+	res = []usersDB{}
+	err = db.C.Select(&res, "select UserID, UserName, UserComment, IsDbAdmin from Users")
 	return
 }

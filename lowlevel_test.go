@@ -32,6 +32,21 @@ func TestLogRecords(t *testing.T) {
 	// t.Error("Be happy")
 }
 
+func TestUsers(t *testing.T) {
+	db := p4db.MustNew(DSN)
+	if users, err := db.Users(); err == nil {
+		for i, u := range users {
+			fmt.Println(i, u)
+		}
+		if users[0].UserName != "BACKUP" {
+			t.Error("User BACKUP expected, got", users[0].UserName)
+		}
+	} else {
+		t.Error(err.Error())
+	}
+	// t.Error("Be happy")
+}
+
 func ExampleLogRecords() {
 	db := p4db.MustNew(DSN)
 	if records, err := db.LogRecords(15130268, "Containers"); err == nil {
