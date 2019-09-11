@@ -27,8 +27,8 @@ type P4db struct {
 }
 
 var (
-	p4dbConn P4db
-	p4dbConnErr error
+	p4dbConn       P4db
+	p4dbConnErr    error
 	createConnOnce sync.Once
 )
 
@@ -44,7 +44,7 @@ func New(dsn string) (res *P4db, err error) {
 		log.Println("Db connections pool initialized")
 		p4dbConn = P4db{C: conn}
 		p4dbConnErr = UpdateMetaInf(&p4dbConn)
-	} )
+	})
 	return &p4dbConn, p4dbConnErr
 }
 
