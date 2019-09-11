@@ -130,3 +130,15 @@ func TestSubContainersListWithCAttributeByType(t *testing.T) {
 	}
 	// t.Error()
 }
+
+func ExampleGetWellsWithCyrillicNames() {
+	db := p4db.MustNew(DSN)
+	typeStr := "wel1"
+	conts, err := db.GetSubContainersListByType(13064997, typeStr)
+	if err != nil {
+		panic(err.Error())
+	}
+	i := 4
+	fmt.Println("Well:", i, conts[i].ContainerName)
+	// Output: Well: 4 1_А
+}
